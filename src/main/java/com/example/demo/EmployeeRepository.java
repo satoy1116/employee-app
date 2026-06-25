@@ -62,4 +62,57 @@ public class EmployeeRepository {
 		
 		return jdbcTemplate.update(sql, empId);
 	}
+	
+	public Employee findById (int empId) {
+		
+		String sql = "SELECT emp_id, emp_name, department FROM employee WHERE emp_id = ?";
+		
+		return jdbcTemplate.queryForObject(
+				sql,
+				(rs, rowNum) -> {
+					Employee emp = new Employee();
+					
+					emp.setEmpId(rs.getInt("emp_id"));
+					emp.setEmpName(rs.getString("emp_name"));
+					emp.setDepartment(rs.getString("department"));
+					
+					return emp;
+				},
+				empId
+			);
+	}
+	
+	public List<Employee> search(String empName, String department) {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT emp_id, emp_name, department ");
+		sql.append("FROM employee ");
+		sql.append("WHERE 1 = 1 ");
+		
+		List<Object> params = new java.util.ArrayList<>();
+		
+		if (empName != null && !empName.isBlank()) {
+			sql.append("AND emp_name LIKE ? ");
+			params.add("%" + empName + "%");
+		}
+		
+		if (department != null && !department.isBlank()) {
+			sql.append("AND department LIKE ? ");
+			params.add("%" + department + "%");
+		}
+		
+		sql.append("ORDER BY emp_id");
+		
+		return jdbcTemplate.query(
+			sql.toString(),
+			(rs, rowNum) -> {
+				Employee emp = new Employee();
+				emp.setEmpId(rs.getInt("emp_id"));
+				emp.setEmpName(rs.getString("emp_name"));
+				emp.setDepartment(rs.getString("department"));
+				return emp;
+			},
+			params.toArray()
+		);
+	}
 }

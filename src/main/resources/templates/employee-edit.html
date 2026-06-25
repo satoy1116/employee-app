@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>社員更新</title>
+</head>
+<body>
+  <h1>社員更新</h1>
+  
+  <form th:action="@{/employees/update}" th:object="${employee}" method="post">
+    社員ID<br>
+    <input type="text" th:field="*{empId}" readonly><br><br>
+    
+    社員名<br>
+    <input type="text" th:field="*{empName}"><br><br>
+    
+    部署<br>
+    <input type="text" th:field="*{department}"><br><br>
+    
+    <button type="submit">更新</button>
+  </form>
+  
+  <br>
+  <a href="/employees">一覧へ戻る</a>
+</body>
+</html>
