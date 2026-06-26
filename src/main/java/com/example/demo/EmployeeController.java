@@ -2,8 +2,11 @@ package com.example.demo;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,19 +59,35 @@ public class EmployeeController {
 	}
 	
 	@PostMapping("/employees")
-	public String add(Employee emp) {
-		
-		employeeRepository.insert(emp);
-		
-		return "redirect:/employees";
+	public String add(
+			@Valid Employee emp,
+			BindingResult bindingResult,
+			 Model model) {
+	  
+	  if (bindingResult.hasErrors()) {
+		  model.addAttribute("employee", emp);
+		  return "employee-form";
+	  }
+	  
+	  employeeRepository.insert(emp);
+	  
+	  return "redirect:/employees";
 	}
 	
 	@PostMapping("/employees/update")
-	public String updateFromForm(Employee emp) {
-		
-		employeeRepository.update(emp);
-		
-		return "redirect:/employees";
+	public String updateFromForm(
+	        @Valid Employee emp,
+	        BindingResult bindingResult,
+	        Model model) {
+	  
+	  if (bindingResult.hasErrors()) {
+	    model.addAttribute("employee", emp);
+	    return "employee-edit";
+	  }
+	  
+	  employeeRepository.update(emp);
+	  
+	  return "redirect:/employees";
 	}
 	
 	@PostMapping("/employees/delete/{empId}")

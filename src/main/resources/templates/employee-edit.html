@@ -12,10 +12,20 @@
     <input type="text" th:field="*{empId}" readonly><br><br>
     
     社員名<br>
-    <input type="text" th:field="*{empName}"><br><br>
+    <input type="text" th:field="*{empName}">
+    <div
+      th:if="${#fields.hasErrors('empName')}"
+      th:errors="*{empName}"
+      style="color:red">
+    </div><br>
     
     部署<br>
-    <input type="text" th:field="*{department}"><br><br>
+    <input type="text" th:field="*{department}">
+    <div
+      th:if="${#fields.hasErrors('department')}"
+      th:errors="*{department}"
+      style="color:red">
+    </div><br>
     
     <button type="submit">更新</button>
   </form>

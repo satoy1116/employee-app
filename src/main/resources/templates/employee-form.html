@@ -9,13 +9,28 @@
   
   <form th:action="@{/employees}"  th:object="${employee}" method="post">
     社員ID<br>
-    <input type="text" th:field="*{empId}"><br><br>
+    <input type="text" th:field="*{empId}">
+    <div
+      th:if="${#fields.hasErrors('empId')}"
+      th:errors="*{empId}"
+      style="color:red">
+    </div><br>
     
     社員名<br>
-    <input type="text" th:field="*{empName}"><br><br>
+    <input type="text" th:field="*{empName}">
+    <div
+      th:if="${#fields.hasErrors('empName')}"
+      th:errors="*{empName}"
+      style="color:red">
+    </div><br>
     
     部署<br>
-    <input type="text" th:field="*{department}"><br><br>
+    <input type="text" th:field="*{department}">
+    <div
+      th:if="${#fields.hasErrors('department')}"
+      th:errors="*{department}"
+      style="color:red">
+    </div><br>
     
     <button type="submit">登録</button>
   </form>

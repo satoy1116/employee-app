@@ -1,15 +1,26 @@
 package com.example.demo;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+
 public class Employee {
 	
-	private int empId;
+	@NotNull(message = "社員IDを入力してください。")
+	@Min(value = 1, message = "社員IDは1以上で入力してください。")
+	private Integer empId;
+	
+	@NotBlank(message = "社員名を入力してください。")
 	private String empName;
+	
+	@NotBlank(message = "部署を入力してください。")
 	private String department;
 	
-	public int getEmpId() {
+	public Integer getEmpId() {
 		return empId;
 	}
-	public void setEmpId(int empId) {
+	public void setEmpId(Integer empId) {
 		this.empId = empId;
 	}
 	
