@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>社員一覧</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
   <h1>社員一覧</h1>
+  
+  <p th:if="${message}" th:text="${message}" class="message"></p>
   
   <form th:action="@{/employees}" method="get">
 	
@@ -26,9 +29,15 @@
   
   <table border="1">
     <tr>
-      <th>ID</th>
-      <th>社員名</th>
-      <th>部署</th>
+      <th>
+		<a th:href="@{/employees(empName=${empName}, department=${department}, page=1, sort='empId')}">社員ID</a>
+	  </th>
+      <th>
+		<a th:href="@{/employees(empName=${empName}, department=${department}, page=1, sort='empName')}">社員名</a>
+	  </th>
+      <th>
+		<a th:href="@{/employees(empName=${empName}, department=${department}, page=1, sort='department')}">部署</a>
+	  </th>
 	  <th>操作</th>
     </tr>
     <tr th:each="emp : ${employees}">
@@ -36,15 +45,60 @@
       <td th:text="${emp.empName}"></td>
       <td th:text="${emp.department}"></td>
 	  <td>
-		<a th:href="@{/employees/edit/{empId}(empId=${emp.empId})}">編集</a>
+		<a th:href="@{/employees/edit/{empId}(
+			empId=${emp.empId},
+			empName=${empName},
+			department=${department},
+			page=${currentPage},
+			sort=${sort}
+		)}">編集</a>
 		
 		<form th:action="@{/employees/delete/{empId}(empId=${emp.empId})}"
 		      method="post"
 			  style="display: inline;">
-			<button type="submit">削除</button>
+			  
+			  <input type="hidden" name="searchEmpName" th:value="${empName}">
+			  <input type="hidden" name="searchDepartment" th:value="${department}">
+			  <input type="hidden" name="currentPage" th:value="${currentPage}">
+			  <input type="hidden" name="sort" th:value="${sort}">
+			  
+			<button
+			    type="submit"
+				onclick="return confirm('本当に削除しますか？');">
+				削除
+			</button>
 		</form>
 	  </td>
     </tr>
   </table>
+  
+  <div th:if="${totalPages > 1}" style="margin-top: 20px;">
+    
+    <a th:if="${currentPage > 1}"
+       th:href="@{/employees(
+         empName=${empName},
+         department=${deaprtment},
+         page=${currentPage - 1},
+         sort=${sort}
+        )}">
+      前へ
+    </a>
+    
+    <span th:text="${currentPage}"></span>
+    /
+    <span th:text="${totalPages}"></span>
+    
+    <a th:if="${currentPage < totalPages}"
+       th:href="@{/employees(
+         empName=${empName},
+         department=${department},
+         page=${currentPage + 1},
+         sort=${sort}
+       )}">
+      次へ
+    </a>
+    
+  </div>
+  
 </body>
 </html>

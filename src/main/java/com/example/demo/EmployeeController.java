@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
@@ -29,13 +30,38 @@ public class EmployeeController {
 	public String list(
 	        String empName,
 	        String department,
+	        Integer page,
+	        String sort,
 	        Model model) {
+	  
+	  int currentPage = 1;
+	  int pageSize = 5;
+	  
+	  if (sort == null || sort.isBlank()) {
+		  sort = "empId";
+	  }
+	  
+	  if (page != null && page > 0) {
+		  currentPage = page;
+	  }
+	  
+	  int totalCount = employeeRepository.count(empName, department);
+	  int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 	        
-	  List<Employee> employees = employeeRepository.search(empName, department);
+	  List<Employee> employees = employeeRepository.searchWithPaging(
+			  empName,
+			  department,
+			  currentPage,
+			  pageSize,
+			  sort);
 	  
 	  model.addAttribute("employees", employees);
 	  model.addAttribute("empName", empName);
 	  model.addAttribute("department", department);
+	  model.addAttribute("currentPage", currentPage);
+	  model.addAttribute("totalCount", totalCount);
+	  model.addAttribute("totalPages", totalPages);
+	  model.addAttribute("sort", sort);
 	  
 	  return "employees";
 	}
@@ -49,11 +75,20 @@ public class EmployeeController {
 	@GetMapping("/employees/edit/{empId}")
 	public String edit(
 			@PathVariable int empId,
-			Model model	) {
+			String empName,
+			String department,
+			Integer page,
+			String sort,
+			Model model) {
 		
 		Employee employee = employeeRepository.findById(empId);
 		
 		model.addAttribute("employee", employee);
+		
+		model.addAttribute("empName", empName);
+		model.addAttribute("department", department);
+		model.addAttribute("page", page);
+		model.addAttribute("sort", sort);
 		
 		return "employee-edit";
 	}
@@ -62,14 +97,23 @@ public class EmployeeController {
 	public String add(
 			@Valid Employee emp,
 			BindingResult bindingResult,
-			 Model model) {
+			Model model,
+			RedirectAttributes redirectAttributes) {
 	  
 	  if (bindingResult.hasErrors()) {
 		  model.addAttribute("employee", emp);
 		  return "employee-form";
 	  }
 	  
+	  if (employeeRepository.existsById(emp.getEmpId())) {
+		  bindingResult.rejectValue("empId", "duplicate", "この社員IDは登録されています。");
+		  
+		  return "employee-form";
+	  }
+	  
 	  employeeRepository.insert(emp);
+	  
+	  redirectAttributes.addFlashAttribute("message", "社員を登録しました。");
 	  
 	  return "redirect:/employees";
 	}
@@ -78,22 +122,49 @@ public class EmployeeController {
 	public String updateFromForm(
 	        @Valid Employee emp,
 	        BindingResult bindingResult,
-	        Model model) {
+	        String searchEmpName,
+	        String searchDepartment,
+	        Integer page,
+	        String sort,
+	        Model model,
+	        RedirectAttributes redirectAttributes) {
 	  
 	  if (bindingResult.hasErrors()) {
 	    model.addAttribute("employee", emp);
+	    model.addAttribute("empName", searchEmpName);
+	    model.addAttribute("department", searchDepartment);
+	    model.addAttribute("page", page);
+	    model.addAttribute("sort", sort);
 	    return "employee-edit";
 	  }
 	  
 	  employeeRepository.update(emp);
 	  
+	  redirectAttributes.addFlashAttribute("message", "社員情報を更新しました。");
+	  redirectAttributes.addAttribute("empName", searchEmpName);
+	  redirectAttributes.addAttribute("department", searchDepartment);
+	  redirectAttributes.addAttribute("page", page);
+	  redirectAttributes.addAttribute("sort", sort);
+	  
 	  return "redirect:/employees";
 	}
 	
 	@PostMapping("/employees/delete/{empId}")
-	public String deleteFromForm(@PathVariable int empId) {
+	public String deleteFromForm(
+			@PathVariable int empId,
+			String searchEmpName,
+			String searchDepartment,
+			Integer currentPage,
+			String sort,
+			RedirectAttributes redirectAttributes) {
 		
 		employeeRepository.delete(empId);
+		
+		redirectAttributes.addFlashAttribute("message", "社員を削除しました。");
+		redirectAttributes.addAttribute("empName", searchEmpName);
+		redirectAttributes.addAttribute("department", searchDepartment);
+		redirectAttributes.addAttribute("page", currentPage);
+		redirectAttributes.addAttribute("sort", sort);
 		
 		return "redirect:/employees";
 	}

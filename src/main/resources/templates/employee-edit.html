@@ -8,6 +8,12 @@
   <h1>社員更新</h1>
   
   <form th:action="@{/employees/update}" th:object="${employee}" method="post">
+	
+	<input type="hidden" name="searchEmpName" th:value="${empName}">
+	<input type="hidden" name="searchDepartment" th:value="${department}">
+	<input type="hidden" name="page" th:value="${page}">
+	<input type="hidden" name="sort" th:value="${sort}">
+	
     社員ID<br>
     <input type="text" th:field="*{empId}" readonly><br><br>
     
@@ -31,6 +37,9 @@
   </form>
   
   <br>
-  <a href="/employees">一覧へ戻る</a>
+  <a th:href="@{/employees(empName=${empName}, department=${department}, page=${page}, sort=${sort})}">
+	  一覧へ戻る
+  </a>
+  
 </body>
 </html>

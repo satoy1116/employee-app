@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -114,5 +115,93 @@ public class EmployeeRepository {
 			},
 			params.toArray()
 		);
+	}
+	
+	public List<Employee> searchWithPaging(
+			  String empName,
+			  String department,
+			  int page,
+			  int size,
+			  String sort) {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT emp_id, emp_name, department ");
+		sql.append("FROM employee ");
+		sql.append("WHERE 1 = 1 ");
+		
+		List<Object> params = new ArrayList<>();
+		
+		if (empName != null && !empName.isBlank()) {
+			sql.append("AND emp_name LIKE ? ");
+			params.add("%" + empName + "%");
+		}
+		
+		if (department != null && !department.isBlank()) {
+			sql.append("AND department LIKE ? ");
+			params.add("%" + department + "%");
+		}
+		
+		if ("empName".equals(sort)) {
+			sql.append("ORDER BY emp_name ");
+		} else if ("department".equals(sort)){
+			sql.append("ORDER BY department ");
+		} else {
+			sql.append("ORDER BY emp_id ");
+		}
+		
+		sql.append("LIMIT ? OFFSET ? ");
+		
+		int offset = (page - 1) * size;
+		
+		params.add(size);
+		params.add(offset);
+		
+		return jdbcTemplate.query(
+				sql.toString(),
+				(rs, rowNum) -> {
+					Employee emp = new Employee();
+					emp.setEmpId(rs.getInt("emp_id"));
+					emp.setEmpName(rs.getString("emp_name"));
+					emp.setDepartment(rs.getString("department"));
+					return emp;		
+				},
+				params.toArray()
+			);
+		
+	}
+	
+	public boolean existsById(Integer empId) {
+		String sql = "SELECT COUNT(*) FROM employee WHERE emp_id = ?";
+		
+		Integer count = jdbcTemplate.queryForObject(sql, Integer.class, empId);
+		
+		return count != null && count > 0;
+	}
+	
+	public int count(String empName, String department) {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(*) ");
+		sql.append("FROM employee ");
+		sql.append("WHERE 1 = 1 ");
+		
+		List<Object> params = new ArrayList<>();
+		
+		if (empName != null && !empName.isBlank()) {
+			sql.append("AND emp_name LIKE ? ");
+			params.add("%" + empName + "%");
+		}
+		
+		if (department != null && !department.isBlank()) {
+			sql.append("AND department LIKE ? ");
+			params.add("%" + department + "%");
+		}
+		
+		Integer count = jdbcTemplate.queryForObject(
+				sql.toString(),
+				Integer.class,
+				params.toArray());
+		
+		return count == null ? 0 : count;
 	}
 }
